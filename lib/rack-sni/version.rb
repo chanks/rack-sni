@@ -1,5 +1,5 @@
 module Rack
-  module Sni
+  module SNI
     VERSION = "0.0.1"
   end
 end

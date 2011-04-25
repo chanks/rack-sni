@@ -1,5 +1,5 @@
 module Rack
-  module Sni
+  module SNI
     # Your code goes here...
   end
 end
