@@ -6,11 +6,11 @@ Gem::Specification.new do |s|
   s.name        = "rack-sni"
   s.version     = Rack::SNI::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
+  s.authors     = ["Chris Hanks"]
+  s.email       = ["christopher.m.hanks@gmail.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Force SSL in your app when SNI is supported.}
+  s.description = %q{A small Rack middleware that forces the use of SSL (via Rack::SSL) if and only if the client supports SNI.}
 
   s.rubyforge_project = "rack-sni"
 
