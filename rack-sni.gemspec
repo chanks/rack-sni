@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "rack-sni"
 
-  s.add_dependency("rack", "~> 1.2.1")
+  s.add_dependency("rack-ssl",  "~> 1.3.2")
   s.add_dependency("useragent", "~> 0.3.1")
 
   s.add_development_dependency("rack-test", "~> 0.6.0")
