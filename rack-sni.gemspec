@@ -14,6 +14,10 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "rack-sni"
 
+  s.add_dependency("rack", "~> 1.2.1")
+
+  s.add_development_dependency("rack-test", "~> 0.6.0")
+
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
