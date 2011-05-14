@@ -7,11 +7,12 @@ require 'spec_helper'
 
 should_use_ssl = [
   # IE7+ on Windows Vista or higher
-  "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)"
+  "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)",
 
   # Any Google Chrome on Windows Vista or higher
 
   # Google Chrome 6+ on WinXP
+  "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.8 (KHTML, like Gecko) Chrome/6.0.397.0 Safari/533.8"
 
   # Google Chrome 5.0.342.1 or newer on OS X 10.5.7 or higher
 
@@ -34,9 +35,10 @@ should_use_ssl = [
 
 should_not_use_ssl = [
   # Any Internet Explorer on WinXP
-  "Mozilla/4.0 (compatible; MSIE 6.0b; Windows NT 5.0)"
+  "Mozilla/4.0 (compatible; MSIE 6.0b; Windows NT 5.0)",
 
   # Google Chrome 5 and under on WinXP
+  "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.2 Safari/533.2"
 
   # Any Safari on WinXP
 
@@ -59,16 +61,37 @@ should_not_use_ssl = [
   # Opera below 8.0, or if TLS 1.1 protocol not enabled
 ]
 
+def default_app
+  lambda { |env|
+    headers = {'Content-Type' => "text/html"}
+    headers['Set-Cookie'] = "id=1; path=/\ntoken=abc; path=/; secure; HttpOnly"
+    [200, headers, ["OK"]]
+  }
+end
+
+def app
+  @app ||= Rack::SNI.new(default_app)
+end
+
 describe "A request with a user-agent of" do
+  include Rack::Test::Methods
+
   should_use_ssl.each do |agent|
     it "#{agent} should be redirected to use SSL" do
-      pending
+      header "User-Agent", agent
+      get "http://example.com/"
+
+      last_response.should be_redirection
+      last_response.location.should == "https://example.com/"
     end
   end
 
   should_not_use_ssl.each do |agent|
     it "#{agent} should not be redirected to use SSL" do
-      pending
+      header "User-Agent", agent
+      get "http://example.com/"
+
+      last_response.should be_ok
     end
   end
 end
