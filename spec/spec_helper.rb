@@ -1,4 +1,4 @@
-require 'rack/sni'
+require 'rack-sni'
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
