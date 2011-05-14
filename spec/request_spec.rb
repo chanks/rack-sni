@@ -5,14 +5,37 @@ require 'spec_helper'
 # and
 # http://www.useragentstring.com/pages/useragentstring.php
 
-should_use_ssl = [
-  # IE7+ on Windows Vista or higher
-  "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)",
+describe Rack::SNI do
+  include Rack::Test::Methods
 
-  # Any Google Chrome on Windows Vista or higher
+  def should_use_ssl_for(agent)
+    header "User-Agent", agent
+    get "http://example.com/"
+    last_response.should be_redirection
+    last_response.location.should == "https://example.com/"
+  end
+
+  def should_not_use_ssl_for(agent)
+    header "User-Agent", agent
+    get "http://example.com/"
+    last_response.should be_ok
+  end
+
+  def app
+    @app ||= Rack::SNI.new(proc { |env| [200, {}, ["Howdy"]] })
+  end
+
+
+
+  ### Agents to require SSL for. ###
+
+  # IE7+ on Windows Vista or higher
+  it { should_use_ssl_for "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)" }
 
   # Google Chrome 6+ on WinXP
-  "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.8 (KHTML, like Gecko) Chrome/6.0.397.0 Safari/533.8"
+  it { should_use_ssl_for "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.8 (KHTML, like Gecko) Chrome/6.0.397.0 Safari/533.8" }
+
+  # Any Google Chrome on Windows Vista or higher
 
   # Google Chrome 5.0.342.1 or newer on OS X 10.5.7 or higher
 
@@ -31,14 +54,16 @@ should_use_ssl = [
   # MobileSafari in Apple iOS 4.0 or later
 
   # Opera 8.0 or later if TLS 1.1 protocol enabled
-]
 
-should_not_use_ssl = [
+
+
+  ### Agents to not require SSL for. ###
+
   # Any Internet Explorer on WinXP
-  "Mozilla/4.0 (compatible; MSIE 6.0b; Windows NT 5.0)",
+  it { should_not_use_ssl_for "Mozilla/4.0 (compatible; MSIE 6.0b; Windows NT 5.0)" }
 
   # Google Chrome 5 and under on WinXP
-  "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.2 Safari/533.2"
+  it { should_not_use_ssl_for "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.2 Safari/533.2" }
 
   # Any Safari on WinXP
 
@@ -59,39 +84,5 @@ should_not_use_ssl = [
   # MobileSafari in Apple iOS before 4.0
 
   # Opera below 8.0, or if TLS 1.1 protocol not enabled
-]
 
-def default_app
-  lambda { |env|
-    headers = {'Content-Type' => "text/html"}
-    headers['Set-Cookie'] = "id=1; path=/\ntoken=abc; path=/; secure; HttpOnly"
-    [200, headers, ["OK"]]
-  }
-end
-
-def app
-  @app ||= Rack::SNI.new(default_app)
-end
-
-describe "A request with a user-agent of" do
-  include Rack::Test::Methods
-
-  should_use_ssl.each do |agent|
-    it "#{agent} should be redirected to use SSL" do
-      header "User-Agent", agent
-      get "http://example.com/"
-
-      last_response.should be_redirection
-      last_response.location.should == "https://example.com/"
-    end
-  end
-
-  should_not_use_ssl.each do |agent|
-    it "#{agent} should not be redirected to use SSL" do
-      header "User-Agent", agent
-      get "http://example.com/"
-
-      last_response.should be_ok
-    end
-  end
 end
